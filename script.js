@@ -48,12 +48,15 @@ const INPUT_IDS = [
   'monthsOwned',
 ];
 
-// 각 입력칸의 값(문자열)을 숫자로 바꿔 하나의 객체에 담습니다.
-// 예: { fuelPrice: 1700, fuelEfficiency: 12, ... }
+// 시나리오 B 입력칸의 id 목록입니다. 유가와 월 주행거리만 바꿀 수 있습니다.
+const SCENARIO_B_IDS = ['compareFuelPrice', 'compareMonthlyKm'];
+
+// ids 목록에 있는 입력칸의 값(문자열)을 숫자로 바꿔 하나의 객체에 담습니다.
+// 예: readInputs(INPUT_IDS) → { fuelPrice: 1700, fuelEfficiency: 12, ... }
 // 빈칸은 Number('')가 0이 되어 버리므로, 0 대신 NaN(숫자 아님)으로 바꿔 검증에서 걸러지게 합니다.
-function readInputs() {
+function readInputs(ids) {
   const inputs = {};
-  for (const id of INPUT_IDS) {
+  for (const id of ids) {
     const text = document.getElementById(id).value.trim();
     inputs[id] = text === '' ? NaN : Number(text);
   }
@@ -90,9 +93,27 @@ function validate(inputs) {
   return errors;
 }
 
-// 오류가 있는 칸은 메시지와 빨간 테두리를 표시하고, 오류가 없는 칸은 이전 표시를 지웁니다.
-function showErrors(errors) {
-  for (const id of INPUT_IDS) {
+// 시나리오 B 입력값(비교 유가, 비교 월 주행거리)을 검사합니다. 둘 다 0 이상이어야 합니다.
+function validateScenarioB(scenarioB) {
+  const errors = {};
+
+  for (const id of SCENARIO_B_IDS) {
+    const value = scenarioB[id];
+
+    if (!Number.isFinite(value)) {
+      errors[id] = '숫자를 입력해주세요';
+    } else if (value < 0) {
+      errors[id] = '0 이상이어야 합니다';
+    }
+  }
+
+  return errors;
+}
+
+// ids 목록의 입력칸 중 오류가 있는 칸은 메시지와 빨간 테두리를 표시하고,
+// 오류가 없는 칸은 이전 표시를 지웁니다.
+function showErrors(ids, errors) {
+  for (const id of ids) {
     const input = document.getElementById(id);
     const message = document.getElementById(id + '-error');
 
@@ -167,20 +188,101 @@ function showResults(result) {
   `;
 }
 
+// ===== 시나리오 비교 =====
+
+// 차이 금액 앞에 부호를 붙입니다. 예: 35000 → "+35,000원", -35000 → "-35,000원", 0 → "0원"
+// 음수는 toLocaleString이 "-"를 붙여 주므로 양수일 때만 "+"를 붙입니다.
+function formatDifference(amount) {
+  const rounded = Math.round(amount);
+  if (rounded > 0) {
+    return '+' + formatWon(rounded);
+  }
+  if (rounded === 0) {
+    return '0원'; // 반올림 결과가 -0일 때 "-0원"으로 보이지 않도록 합니다.
+  }
+  return formatWon(rounded);
+}
+
+// 시나리오 A와 B의 월 비용을 항목별로 비교하는 표와, 연 총비용 비교를 표시합니다.
+// 두 결과의 items는 같은 순서(주유비, 보험료, ...)로 들어 있습니다.
+function showComparison(resultA, resultB) {
+  let rows = '';
+  for (let i = 0; i < resultA.items.length; i++) {
+    const itemA = resultA.items[i];
+    const itemB = resultB.items[i];
+    rows += `
+      <tr>
+        <td>${itemA.name}</td>
+        <td>${formatWon(itemA.monthly)}</td>
+        <td>${formatWon(itemB.monthly)}</td>
+        <td>${formatDifference(itemB.monthly - itemA.monthly)}</td>
+      </tr>
+    `;
+  }
+
+  document.getElementById('comparison-content').innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>항목</th>
+          <th>시나리오 A</th>
+          <th>시나리오 B</th>
+          <th>차이 (B − A)</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows}
+        <tr>
+          <th>월 총비용</th>
+          <th>${formatWon(resultA.monthlyTotal)}</th>
+          <th>${formatWon(resultB.monthlyTotal)}</th>
+          <th>${formatDifference(resultB.monthlyTotal - resultA.monthlyTotal)}</th>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      연 총비용: A ${formatWon(resultA.yearlyTotal)} /
+      B ${formatWon(resultB.yearlyTotal)} /
+      차이 ${formatDifference(resultB.yearlyTotal - resultA.yearlyTotal)}
+    </p>
+  `;
+}
+
 // ===== 버튼 연결 =====
 
 // 계산하기 버튼을 누르면: 입력 읽기 → 검증 → (문제없을 때만) 계산 → 결과 표시
 document.getElementById('calculate-button').addEventListener('click', function () {
-  const inputs = readInputs();
-  const errors = validate(inputs);
-  showErrors(errors);
+  const inputs = readInputs(INPUT_IDS);
+  const scenarioB = readInputs(SCENARIO_B_IDS);
 
-  // 오류가 하나라도 있으면 이전 결과를 지우고 계산하지 않습니다.
+  const errors = validate(inputs);
+  const errorsB = validateScenarioB(scenarioB);
+  showErrors(INPUT_IDS, errors);
+  showErrors(SCENARIO_B_IDS, errorsB);
+
+  // 이전 결과를 먼저 지우고, 오류가 없는 결과만 다시 표시합니다.
+  document.getElementById('results-content').innerHTML = '';
+  document.getElementById('comparison-content').innerHTML = '';
+
+  // 시나리오 A에 오류가 있으면 A 결과와 비교 결과 모두 계산하지 않습니다.
   if (Object.keys(errors).length > 0) {
-    document.getElementById('results-content').innerHTML = '';
     return;
   }
 
   const result = calculateCosts(inputs);
   showResults(result);
+
+  // 시나리오 B에 오류가 있으면 비교 결과만 계산하지 않습니다.
+  if (Object.keys(errorsB).length > 0) {
+    return;
+  }
+
+  // A 입력값을 복사한 뒤 유가와 월 주행거리만 B 값으로 덮어씁니다.
+  const inputsB = {
+    ...inputs,
+    fuelPrice: scenarioB.compareFuelPrice,
+    monthlyKm: scenarioB.compareMonthlyKm,
+  };
+  const resultB = calculateCosts(inputsB);
+  showComparison(result, resultB);
 });
