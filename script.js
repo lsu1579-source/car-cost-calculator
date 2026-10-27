@@ -50,12 +50,60 @@ const INPUT_IDS = [
 
 // 각 입력칸의 값(문자열)을 숫자로 바꿔 하나의 객체에 담습니다.
 // 예: { fuelPrice: 1700, fuelEfficiency: 12, ... }
+// 빈칸은 Number('')가 0이 되어 버리므로, 0 대신 NaN(숫자 아님)으로 바꿔 검증에서 걸러지게 합니다.
 function readInputs() {
   const inputs = {};
   for (const id of INPUT_IDS) {
-    inputs[id] = Number(document.getElementById(id).value);
+    const text = document.getElementById(id).value.trim();
+    inputs[id] = text === '' ? NaN : Number(text);
   }
   return inputs;
+}
+
+// ===== 입력 검증 =====
+
+// 입력값을 검사해 잘못된 칸의 오류 메시지를 모아 돌려줍니다.
+// 예: { fuelEfficiency: '연비는 0보다 커야 합니다' }
+// 문제가 없으면 빈 객체 {}를 돌려줍니다.
+function validate(inputs) {
+  const errors = {};
+
+  for (const id of INPUT_IDS) {
+    const value = inputs[id];
+
+    if (!Number.isFinite(value)) {
+      errors[id] = '숫자를 입력해주세요';
+    } else if (id === 'fuelEfficiency' && value <= 0) {
+      errors[id] = '연비는 0보다 커야 합니다';
+    } else if (id === 'monthsOwned' && (value < 1 || !Number.isInteger(value))) {
+      errors[id] = '보유 기간은 1개월 이상의 정수로 입력해주세요';
+    } else if (value < 0) {
+      errors[id] = '0 이상이어야 합니다';
+    }
+  }
+
+  // 두 칸이 모두 올바른 숫자일 때만 서로 비교합니다.
+  if (!errors.purchasePrice && !errors.currentValue && inputs.currentValue > inputs.purchasePrice) {
+    errors.currentValue = '현재 차량가치는 구입 가격보다 클 수 없습니다';
+  }
+
+  return errors;
+}
+
+// 오류가 있는 칸은 메시지와 빨간 테두리를 표시하고, 오류가 없는 칸은 이전 표시를 지웁니다.
+function showErrors(errors) {
+  for (const id of INPUT_IDS) {
+    const input = document.getElementById(id);
+    const message = document.getElementById(id + '-error');
+
+    if (errors[id]) {
+      message.textContent = errors[id];
+      input.style.outline = '2px solid red';
+    } else {
+      message.textContent = '';
+      input.style.outline = '';
+    }
+  }
 }
 
 // ===== 화면 출력 =====
@@ -121,9 +169,18 @@ function showResults(result) {
 
 // ===== 버튼 연결 =====
 
-// 계산하기 버튼을 누르면: 입력 읽기 → 계산 → 결과 표시
+// 계산하기 버튼을 누르면: 입력 읽기 → 검증 → (문제없을 때만) 계산 → 결과 표시
 document.getElementById('calculate-button').addEventListener('click', function () {
   const inputs = readInputs();
+  const errors = validate(inputs);
+  showErrors(errors);
+
+  // 오류가 하나라도 있으면 이전 결과를 지우고 계산하지 않습니다.
+  if (Object.keys(errors).length > 0) {
+    document.getElementById('results-content').innerHTML = '';
+    return;
+  }
+
   const result = calculateCosts(inputs);
   showResults(result);
 });
