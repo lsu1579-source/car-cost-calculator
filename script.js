@@ -65,11 +65,57 @@ function formatWon(amount) {
   return Math.round(amount).toLocaleString('ko-KR') + '원';
 }
 
-// 계산 결과 중 월 총비용과 연 총비용을 결과 영역에 표시합니다.
+// 월 총비용에서 한 항목이 차지하는 비중(%)을 구합니다.
+// 총비용이 0원이면 0으로 나누지 않도록 0%로 처리합니다.
+function calculateShare(itemMonthly, monthlyTotal) {
+  if (monthlyTotal === 0) {
+    return 0;
+  }
+  return (itemMonthly / monthlyTotal) * 100;
+}
+
+// 항목별 내역 표의 HTML을 만듭니다. items 배열의 항목 하나가 표의 한 행이 됩니다.
+function buildBreakdownTable(result) {
+  let rows = '';
+  for (const item of result.items) {
+    const share = calculateShare(item.monthly, result.monthlyTotal);
+    // 막대: 회색 바탕 안에 비중만큼 너비를 채운 막대 (디자인은 7단계에서 정리)
+    rows += `
+      <tr>
+        <td>${item.name}</td>
+        <td>${formatWon(item.monthly)}</td>
+        <td>${formatWon(item.yearly)}</td>
+        <td>
+          ${share.toFixed(1)}%
+          <div style="display: inline-block; width: 100px; height: 10px; background: #ddd;">
+            <div style="width: ${share}%; height: 100%; background: #4a7;"></div>
+          </div>
+        </td>
+      </tr>
+    `;
+  }
+
+  return `
+    <table>
+      <thead>
+        <tr>
+          <th>항목</th>
+          <th>월 비용</th>
+          <th>연 비용</th>
+          <th>비중(%)</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+// 월 총비용, 연 총비용, 항목별 내역 표를 결과 영역에 표시합니다.
 function showResults(result) {
   document.getElementById('results-content').innerHTML = `
     <p>월 총비용: ${formatWon(result.monthlyTotal)}</p>
     <p>연 총비용: ${formatWon(result.yearlyTotal)}</p>
+    ${buildBreakdownTable(result)}
   `;
 }
 
