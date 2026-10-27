@@ -4,90 +4,129 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Car Cost Calculator</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Car Cost Calculator</h1>
-  <p>자동차를 보유하는 데 드는 월간·연간 비용을 계산합니다.</p>
+  <main class="container">
+    <header class="page-header">
+      <h1>Car Cost Calculator</h1>
+      <p>자동차를 보유하는 데 드는 월간·연간 비용을 계산합니다.</p>
+    </header>
 
-  <!-- 입력 폼: 비용 항목별로 fieldset으로 묶었습니다.
-       각 입력칸 뒤의 span에는 입력이 잘못됐을 때 오류 메시지가 표시됩니다. -->
-  <form id="cost-form">
-    <fieldset>
-      <legend>주유</legend>
-      <label for="fuelPrice">유가 (원/L)</label>
-      <input type="number" id="fuelPrice" value="1700" min="0" required>
-      <span id="fuelPrice-error" style="color: red;"></span>
+    <!-- 입력 폼: 비용 항목별로 fieldset으로 묶었습니다.
+         입력칸 하나는 label, input, 오류 메시지(span)를 묶은 div.field 하나입니다.
+         span에는 입력이 잘못됐을 때 오류 메시지가 표시됩니다. -->
+    <form id="cost-form" class="card">
+      <fieldset>
+        <legend>주유</legend>
+        <div class="field-grid">
+          <div class="field">
+            <label for="fuelPrice">유가 (원/L)</label>
+            <input type="number" id="fuelPrice" value="1700" min="0" required>
+            <span id="fuelPrice-error" class="error-message"></span>
+          </div>
 
-      <label for="fuelEfficiency">연비 (km/L)</label>
-      <input type="number" id="fuelEfficiency" value="12" min="0.1" step="any" required>
-      <span id="fuelEfficiency-error" style="color: red;"></span>
+          <div class="field">
+            <label for="fuelEfficiency">연비 (km/L)</label>
+            <input type="number" id="fuelEfficiency" value="12" min="0.1" step="any" required>
+            <span id="fuelEfficiency-error" class="error-message"></span>
+          </div>
 
-      <label for="monthlyKm">월 주행거리 (km)</label>
-      <input type="number" id="monthlyKm" value="1000" min="0" required>
-      <span id="monthlyKm-error" style="color: red;"></span>
-    </fieldset>
+          <div class="field">
+            <label for="monthlyKm">월 주행거리 (km)</label>
+            <input type="number" id="monthlyKm" value="1000" min="0" required>
+            <span id="monthlyKm-error" class="error-message"></span>
+          </div>
+        </div>
+      </fieldset>
 
-    <fieldset>
-      <legend>보험 · 세금 · 주차 · 정비</legend>
-      <label for="insuranceYearly">연간 보험료 (원)</label>
-      <input type="number" id="insuranceYearly" value="900000" min="0" required>
-      <span id="insuranceYearly-error" style="color: red;"></span>
+      <fieldset>
+        <legend>보험 · 세금 · 주차 · 정비</legend>
+        <div class="field-grid">
+          <div class="field">
+            <label for="insuranceYearly">연간 보험료 (원)</label>
+            <input type="number" id="insuranceYearly" value="900000" min="0" required>
+            <span id="insuranceYearly-error" class="error-message"></span>
+          </div>
 
-      <label for="carTaxYearly">연간 자동차세 (원)</label>
-      <input type="number" id="carTaxYearly" value="300000" min="0" required>
-      <span id="carTaxYearly-error" style="color: red;"></span>
+          <div class="field">
+            <label for="carTaxYearly">연간 자동차세 (원)</label>
+            <input type="number" id="carTaxYearly" value="300000" min="0" required>
+            <span id="carTaxYearly-error" class="error-message"></span>
+          </div>
 
-      <label for="parkingMonthly">월 주차비 (원)</label>
-      <input type="number" id="parkingMonthly" value="100000" min="0" required>
-      <span id="parkingMonthly-error" style="color: red;"></span>
+          <div class="field">
+            <label for="parkingMonthly">월 주차비 (원)</label>
+            <input type="number" id="parkingMonthly" value="100000" min="0" required>
+            <span id="parkingMonthly-error" class="error-message"></span>
+          </div>
 
-      <label for="maintenanceYearly">연간 정비비 (원)</label>
-      <input type="number" id="maintenanceYearly" value="600000" min="0" required>
-      <span id="maintenanceYearly-error" style="color: red;"></span>
-    </fieldset>
+          <div class="field">
+            <label for="maintenanceYearly">연간 정비비 (원)</label>
+            <input type="number" id="maintenanceYearly" value="600000" min="0" required>
+            <span id="maintenanceYearly-error" class="error-message"></span>
+          </div>
+        </div>
+      </fieldset>
 
-    <fieldset>
-      <legend>감가상각</legend>
-      <label for="purchasePrice">구입 가격 (원)</label>
-      <input type="number" id="purchasePrice" value="40000000" min="0" required>
-      <span id="purchasePrice-error" style="color: red;"></span>
+      <fieldset>
+        <legend>감가상각</legend>
+        <div class="field-grid">
+          <div class="field">
+            <label for="purchasePrice">구입 가격 (원)</label>
+            <input type="number" id="purchasePrice" value="40000000" min="0" required>
+            <span id="purchasePrice-error" class="error-message"></span>
+          </div>
 
-      <label for="currentValue">현재 예상 차량가치 (원)</label>
-      <input type="number" id="currentValue" value="36000000" min="0" required>
-      <span id="currentValue-error" style="color: red;"></span>
+          <div class="field">
+            <label for="currentValue">현재 예상 차량가치 (원)</label>
+            <input type="number" id="currentValue" value="36000000" min="0" required>
+            <span id="currentValue-error" class="error-message"></span>
+          </div>
 
-      <label for="monthsOwned">현재까지 보유한 기간 (개월)</label>
-      <input type="number" id="monthsOwned" value="6" min="1" step="1" required>
-      <span id="monthsOwned-error" style="color: red;"></span>
-    </fieldset>
+          <div class="field">
+            <label for="monthsOwned">현재까지 보유한 기간 (개월)</label>
+            <input type="number" id="monthsOwned" value="6" min="1" step="1" required>
+            <span id="monthsOwned-error" class="error-message"></span>
+          </div>
+        </div>
+      </fieldset>
 
-    <!-- 시나리오 B: 위 입력값(시나리오 A)에서 유가와 월 주행거리만 바꿔 비교합니다. -->
-    <fieldset>
-      <legend>시나리오 비교 (B)</legend>
-      <label for="compareFuelPrice">비교 유가 (원/L)</label>
-      <input type="number" id="compareFuelPrice" value="1700" min="0" required>
-      <span id="compareFuelPrice-error" style="color: red;"></span>
+      <!-- 시나리오 B: 위 입력값(시나리오 A)에서 유가와 월 주행거리만 바꿔 비교합니다. -->
+      <fieldset class="scenario-fieldset">
+        <legend>시나리오 비교 (B)</legend>
+        <p class="fieldset-note">위 입력값(시나리오 A)에서 유가와 월 주행거리만 바꿔 비교합니다.</p>
+        <div class="field-grid">
+          <div class="field">
+            <label for="compareFuelPrice">비교 유가 (원/L)</label>
+            <input type="number" id="compareFuelPrice" value="1700" min="0" required>
+            <span id="compareFuelPrice-error" class="error-message"></span>
+          </div>
 
-      <label for="compareMonthlyKm">비교 월 주행거리 (km)</label>
-      <input type="number" id="compareMonthlyKm" value="1000" min="0" required>
-      <span id="compareMonthlyKm-error" style="color: red;"></span>
-    </fieldset>
+          <div class="field">
+            <label for="compareMonthlyKm">비교 월 주행거리 (km)</label>
+            <input type="number" id="compareMonthlyKm" value="1000" min="0" required>
+            <span id="compareMonthlyKm-error" class="error-message"></span>
+          </div>
+        </div>
+      </fieldset>
 
-    <!-- type="button": 클릭해도 페이지가 새로고침되지 않도록 합니다. -->
-    <button type="button" id="calculate-button">계산하기</button>
-  </form>
+      <!-- type="button": 클릭해도 페이지가 새로고침되지 않도록 합니다. -->
+      <button type="button" id="calculate-button" class="calculate-button">계산하기</button>
+    </form>
 
-  <!-- 결과 영역: script.js가 계산 결과를 표시합니다. -->
-  <section id="results">
-    <h2>계산 결과</h2>
-    <div id="results-content"></div>
-  </section>
+    <!-- 결과 영역: script.js가 계산 결과를 표시합니다. -->
+    <section id="results" class="card">
+      <h2>계산 결과</h2>
+      <div id="results-content"></div>
+    </section>
 
-  <!-- 시나리오 비교 결과: script.js가 A와 B의 비교 표를 표시합니다. -->
-  <section id="comparison">
-    <h2>시나리오 비교</h2>
-    <div id="comparison-content"></div>
-  </section>
+    <!-- 시나리오 비교 결과: script.js가 A와 B의 비교 표를 표시합니다. -->
+    <section id="comparison" class="card">
+      <h2>시나리오 비교</h2>
+      <div id="comparison-content"></div>
+    </section>
+  </main>
 
   <script src="script.js"></script>
 </body>

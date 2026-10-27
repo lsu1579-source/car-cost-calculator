@@ -1,0 +1,326 @@
+/* ===== 색상과 기본값 ===== */
+
+/* 자주 쓰는 색을 변수로 모아 두어 한 곳에서 바꿀 수 있게 합니다. */
+:root {
+  --color-text: #1f2933;
+  --color-muted: #5f6b7a;
+  --color-background: #f4f6f8;
+  --color-card: #ffffff;
+  --color-border: #d9dee4;
+  --color-primary: #2563eb;
+  --color-primary-dark: #1d4ed8;
+  --color-bar-track: #e5e9ee;
+  --color-error: #c62828;
+  --color-error-background: #fdecec;
+  --color-increase: #c62828;
+  --color-decrease: #2e7d32;
+}
+
+/* 입력칸의 너비에 padding과 border를 포함시켜 칸이 화면 밖으로 넘치지 않게 합니다. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: system-ui, -apple-system, "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* ===== 전체 레이아웃 ===== */
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.page-header h1 {
+  margin: 0 0 4px;
+  font-size: 1.75rem;
+}
+
+.page-header p {
+  margin: 0 0 24px;
+  color: var(--color-muted);
+}
+
+/* 입력 영역과 결과 영역을 각각 흰색 카드로 구분합니다. */
+.card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.card h2 {
+  margin: 0 0 16px;
+  font-size: 1.25rem;
+}
+
+/* ===== 입력 폼 ===== */
+
+fieldset {
+  margin: 0 0 16px;
+  padding: 12px 16px 4px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+legend {
+  padding: 0 6px;
+  font-weight: 600;
+}
+
+/* 시나리오 B 입력 묶음은 배경색으로 기본 입력과 구분합니다. */
+.scenario-fieldset {
+  background: #f7f9ff;
+}
+
+.fieldset-note {
+  margin: 0 0 8px;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+/* 입력칸을 격자로 배치합니다. 화면이 좁아지면 한 줄에 들어가는 칸 수가 자동으로 줄어듭니다. */
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0 16px;
+}
+
+/* label 위, 입력칸 가운데, 오류 메시지 아래로 세로 정렬합니다. */
+.field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+}
+
+.field label {
+  margin-bottom: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.field input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.field input:focus {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+/* ===== 오류 표시 ===== */
+
+/* 오류 메시지 자리를 미리 확보해 두어, 메시지가 나타나도 아래 칸이 밀리지 않게 합니다. */
+.error-message {
+  min-height: 1.4em;
+  color: var(--color-error);
+  font-size: 0.85rem;
+}
+
+/* script.js가 오류가 있는 입력칸에 input-error class를 붙입니다. */
+.field input.input-error {
+  border-color: var(--color-error);
+  background: var(--color-error-background);
+}
+
+.field input.input-error:focus {
+  outline-color: var(--color-error);
+}
+
+/* ===== 계산하기 버튼 ===== */
+
+.calculate-button {
+  display: block;
+  min-width: 200px;
+  min-height: 44px;
+  margin: 8px auto 0;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 6px;
+  background: var(--color-primary);
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.calculate-button:hover {
+  background: var(--color-primary-dark);
+}
+
+.calculate-button:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ===== 결과: 총비용 ===== */
+
+.totals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.total-box {
+  padding: 12px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-background);
+}
+
+.total-label {
+  display: block;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+.total-value {
+  display: block;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+/* ===== 표 ===== */
+
+/* 표가 화면보다 넓으면 이 상자 안에서만 가로로 스크롤됩니다. */
+.table-wrap {
+  overflow-x: auto;
+}
+
+.cost-table {
+  width: 100%;
+  min-width: 480px;
+  border-collapse: collapse;
+}
+
+.cost-table th,
+.cost-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.cost-table thead th {
+  border-bottom: 2px solid var(--color-text);
+  font-size: 0.9rem;
+}
+
+/* 첫 번째 열(항목 이름)은 왼쪽, 금액 열은 자릿수를 맞추기 위해 오른쪽 정렬합니다. */
+.cost-table th:first-child,
+.cost-table td:first-child {
+  text-align: left;
+}
+
+.cost-table th:not(:first-child),
+.cost-table td:not(:first-child) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 비교 표의 마지막 행(월 총비용)은 굵게 강조합니다. */
+.cost-table .total-row th {
+  border-top: 2px solid var(--color-text);
+  border-bottom: none;
+}
+
+/* ===== 비중 막대 ===== */
+
+/* 비율 글자의 너비를 고정해 모든 행에서 막대가 같은 위치에서 시작하게 합니다. */
+.share {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.share-text {
+  width: 3.5em;
+  text-align: right;
+}
+
+.share-bar {
+  width: 100px;
+  height: 10px;
+  border-radius: 5px;
+  background: var(--color-bar-track);
+  overflow: hidden;
+}
+
+.share-bar-fill {
+  height: 100%;
+  background: var(--color-primary);
+}
+
+/* ===== 시나리오 비교의 차이 금액 ===== */
+
+/* script.js가 차이의 부호에 따라 아래 class 중 하나를 붙입니다.
+   +, - 기호도 함께 표시되므로 색상만으로 의미를 전달하지 않습니다. */
+.difference-increase {
+  color: var(--color-increase);
+}
+
+.difference-decrease {
+  color: var(--color-decrease);
+}
+
+.difference-zero {
+  color: var(--color-text);
+}
+
+/* ===== 비교 결과의 연 총비용 요약 ===== */
+
+.comparison-summary {
+  margin: 16px 0 0;
+  padding: 12px 16px;
+  border-radius: 6px;
+  background: var(--color-background);
+}
+
+/* ===== 작은 화면 (휴대폰) ===== */
+
+@media (max-width: 600px) {
+  .container {
+    padding: 16px 12px 32px;
+  }
+
+  .page-header h1 {
+    font-size: 1.4rem;
+  }
+
+  .card {
+    padding: 16px 12px;
+  }
+
+  fieldset {
+    padding: 8px 10px 2px;
+  }
+
+  /* 입력칸을 한 줄에 하나씩 배치합니다. */
+  .field-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* 버튼을 화면 너비에 맞춰 누르기 쉽게 합니다. */
+  .calculate-button {
+    width: 100%;
+  }
+
+  .total-value {
+    font-size: 1.35rem;
+  }
+}

@@ -110,8 +110,8 @@ function validateScenarioB(scenarioB) {
   return errors;
 }
 
-// ids 목록의 입력칸 중 오류가 있는 칸은 메시지와 빨간 테두리를 표시하고,
-// 오류가 없는 칸은 이전 표시를 지웁니다.
+// ids 목록의 입력칸 중 오류가 있는 칸은 메시지를 표시하고 input-error class를 붙이며,
+// 오류가 없는 칸은 이전 표시를 지웁니다. 오류 칸의 모양은 style.css에서 정합니다.
 function showErrors(ids, errors) {
   for (const id of ids) {
     const input = document.getElementById(id);
@@ -119,10 +119,10 @@ function showErrors(ids, errors) {
 
     if (errors[id]) {
       message.textContent = errors[id];
-      input.style.outline = '2px solid red';
+      input.classList.add('input-error');
     } else {
       message.textContent = '';
-      input.style.outline = '';
+      input.classList.remove('input-error');
     }
   }
 }
@@ -148,16 +148,19 @@ function buildBreakdownTable(result) {
   let rows = '';
   for (const item of result.items) {
     const share = calculateShare(item.monthly, result.monthlyTotal);
-    // 막대: 회색 바탕 안에 비중만큼 너비를 채운 막대 (디자인은 7단계에서 정리)
+    // 막대: 바탕(share-bar) 안에 비중만큼 너비를 채운 막대(share-bar-fill)
+    // 모양은 style.css에서 정하고, 항목마다 다른 너비(width)만 여기서 정합니다.
     rows += `
       <tr>
         <td>${item.name}</td>
         <td>${formatWon(item.monthly)}</td>
         <td>${formatWon(item.yearly)}</td>
         <td>
-          ${share.toFixed(1)}%
-          <div style="display: inline-block; width: 100px; height: 10px; background: #ddd;">
-            <div style="width: ${share}%; height: 100%; background: #4a7;"></div>
+          <div class="share">
+            <span class="share-text">${share.toFixed(1)}%</span>
+            <div class="share-bar">
+              <div class="share-bar-fill" style="width: ${share}%;"></div>
+            </div>
           </div>
         </td>
       </tr>
@@ -165,25 +168,35 @@ function buildBreakdownTable(result) {
   }
 
   return `
-    <table>
-      <thead>
-        <tr>
-          <th>항목</th>
-          <th>월 비용</th>
-          <th>연 비용</th>
-          <th>비중(%)</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>
+    <div class="table-wrap">
+      <table class="cost-table">
+        <thead>
+          <tr>
+            <th>항목</th>
+            <th>월 비용</th>
+            <th>연 비용</th>
+            <th>비중(%)</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
   `;
 }
 
 // 월 총비용, 연 총비용, 항목별 내역 표를 결과 영역에 표시합니다.
 function showResults(result) {
   document.getElementById('results-content').innerHTML = `
-    <p>월 총비용: ${formatWon(result.monthlyTotal)}</p>
-    <p>연 총비용: ${formatWon(result.yearlyTotal)}</p>
+    <div class="totals">
+      <div class="total-box">
+        <span class="total-label">월 총비용</span>
+        <strong class="total-value">${formatWon(result.monthlyTotal)}</strong>
+      </div>
+      <div class="total-box">
+        <span class="total-label">연 총비용</span>
+        <strong class="total-value">${formatWon(result.yearlyTotal)}</strong>
+      </div>
+    </div>
     ${buildBreakdownTable(result)}
   `;
 }
@@ -203,6 +216,19 @@ function formatDifference(amount) {
   return formatWon(rounded);
 }
 
+// 차이 금액의 부호에 맞는 CSS class 이름을 돌려줍니다. 실제 색상은 style.css에서 정합니다.
+// formatDifference와 같은 반올림 값을 기준으로 해서, "0원"으로 보이는 값에는 색을 넣지 않습니다.
+function differenceClass(amount) {
+  const rounded = Math.round(amount);
+  if (rounded > 0) {
+    return 'difference-increase';
+  }
+  if (rounded < 0) {
+    return 'difference-decrease';
+  }
+  return 'difference-zero';
+}
+
 // 시나리오 A와 B의 월 비용을 항목별로 비교하는 표와, 연 총비용 비교를 표시합니다.
 // 두 결과의 items는 같은 순서(주유비, 보험료, ...)로 들어 있습니다.
 function showComparison(resultA, resultB) {
@@ -210,40 +236,46 @@ function showComparison(resultA, resultB) {
   for (let i = 0; i < resultA.items.length; i++) {
     const itemA = resultA.items[i];
     const itemB = resultB.items[i];
+    const difference = itemB.monthly - itemA.monthly;
     rows += `
       <tr>
         <td>${itemA.name}</td>
         <td>${formatWon(itemA.monthly)}</td>
         <td>${formatWon(itemB.monthly)}</td>
-        <td>${formatDifference(itemB.monthly - itemA.monthly)}</td>
+        <td class="${differenceClass(difference)}">${formatDifference(difference)}</td>
       </tr>
     `;
   }
 
+  const monthlyDifference = resultB.monthlyTotal - resultA.monthlyTotal;
+  const yearlyDifference = resultB.yearlyTotal - resultA.yearlyTotal;
+
   document.getElementById('comparison-content').innerHTML = `
-    <table>
-      <thead>
-        <tr>
-          <th>항목</th>
-          <th>시나리오 A</th>
-          <th>시나리오 B</th>
-          <th>차이 (B − A)</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${rows}
-        <tr>
-          <th>월 총비용</th>
-          <th>${formatWon(resultA.monthlyTotal)}</th>
-          <th>${formatWon(resultB.monthlyTotal)}</th>
-          <th>${formatDifference(resultB.monthlyTotal - resultA.monthlyTotal)}</th>
-        </tr>
-      </tbody>
-    </table>
-    <p>
+    <div class="table-wrap">
+      <table class="cost-table">
+        <thead>
+          <tr>
+            <th>항목</th>
+            <th>시나리오 A</th>
+            <th>시나리오 B</th>
+            <th>차이 (B − A)</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows}
+          <tr class="total-row">
+            <th>월 총비용</th>
+            <th>${formatWon(resultA.monthlyTotal)}</th>
+            <th>${formatWon(resultB.monthlyTotal)}</th>
+            <th class="${differenceClass(monthlyDifference)}">${formatDifference(monthlyDifference)}</th>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="comparison-summary">
       연 총비용: A ${formatWon(resultA.yearlyTotal)} /
       B ${formatWon(resultB.yearlyTotal)} /
-      차이 ${formatDifference(resultB.yearlyTotal - resultA.yearlyTotal)}
+      차이 <span class="${differenceClass(yearlyDifference)}">${formatDifference(yearlyDifference)}</span>
     </p>
   `;
 }
