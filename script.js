@@ -32,20 +32,52 @@ function calculateCosts(inputs) {
   return { items, monthlyTotal, yearlyTotal };
 }
 
-// ===== 임시 확인용 (2단계) =====
-// index.html의 기본값과 같은 예시 입력으로 계산 결과를 콘솔에 출력합니다.
-// 3단계에서 실제 입력값을 읽도록 바꾸면 삭제합니다.
-const exampleInputs = {
-  fuelPrice: 1700,
-  fuelEfficiency: 12,
-  monthlyKm: 1000,
-  insuranceYearly: 900000,
-  carTaxYearly: 300000,
-  parkingMonthly: 100000,
-  maintenanceYearly: 600000,
-  purchasePrice: 40000000,
-  currentValue: 36000000,
-  monthsOwned: 6,
-};
+// ===== 입력 읽기 =====
 
-console.log(calculateCosts(exampleInputs));
+// HTML 입력칸의 id 목록입니다. calculateCosts가 쓰는 입력값 이름과 같습니다.
+const INPUT_IDS = [
+  'fuelPrice',
+  'fuelEfficiency',
+  'monthlyKm',
+  'insuranceYearly',
+  'carTaxYearly',
+  'parkingMonthly',
+  'maintenanceYearly',
+  'purchasePrice',
+  'currentValue',
+  'monthsOwned',
+];
+
+// 각 입력칸의 값(문자열)을 숫자로 바꿔 하나의 객체에 담습니다.
+// 예: { fuelPrice: 1700, fuelEfficiency: 12, ... }
+function readInputs() {
+  const inputs = {};
+  for (const id of INPUT_IDS) {
+    inputs[id] = Number(document.getElementById(id).value);
+  }
+  return inputs;
+}
+
+// ===== 화면 출력 =====
+
+// 금액을 원 단위로 반올림하고 천 단위 쉼표를 붙입니다. 예: 1058333.33 → "1,058,333원"
+function formatWon(amount) {
+  return Math.round(amount).toLocaleString('ko-KR') + '원';
+}
+
+// 계산 결과 중 월 총비용과 연 총비용을 결과 영역에 표시합니다.
+function showResults(result) {
+  document.getElementById('results-content').innerHTML = `
+    <p>월 총비용: ${formatWon(result.monthlyTotal)}</p>
+    <p>연 총비용: ${formatWon(result.yearlyTotal)}</p>
+  `;
+}
+
+// ===== 버튼 연결 =====
+
+// 계산하기 버튼을 누르면: 입력 읽기 → 계산 → 결과 표시
+document.getElementById('calculate-button').addEventListener('click', function () {
+  const inputs = readInputs();
+  const result = calculateCosts(inputs);
+  showResults(result);
+});
