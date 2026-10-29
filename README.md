@@ -12,6 +12,8 @@ Main features:
 
 ## 2. How to Run and Use
 
+Live demo: https://lsu1579-source.github.io/car-cost-calculator/
+
 This static web app uses only HTML, CSS, and JavaScript; no installation or build step is needed.
 
 1. Open `index.html` in a browser.
