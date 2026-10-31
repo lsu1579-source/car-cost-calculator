@@ -117,7 +117,6 @@ Other checks included a 6.5-month ownership period, a negative cost, and empty o
 - Car tax must be entered manually; it is not calculated from engine size or vehicle age.
 - EV charging, loan or installment interest, tolls, car washes, and similar costs are not included.
 - Only fuel price and monthly mileage can be changed in the scenario comparison.
-- Browser verification was done only in Chromium, not in Safari, Firefox, or on an actual phone.
 
 ## 8. Key Source Files for Grading
 
